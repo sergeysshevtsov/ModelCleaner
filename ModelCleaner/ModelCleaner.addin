@@ -1,0 +1,11 @@
+﻿<RevitAddIns>
+    <AddIn Type="Application">
+        <Name>ModelCleaner</Name>
+        <Assembly>ModelCleaner/ModelCleaner.dll</Assembly>
+        <AddInId>B32FEE6A-DA89-4E36-BDD8-7ED74F7D20CE</AddInId>
+        <FullClassName>ModelCleaner.Application</FullClassName>
+        <VendorId>Development</VendorId>
+        <VendorDescription></VendorDescription>
+        <VendorEmail></VendorEmail>
+    </AddIn>
+</RevitAddIns>
