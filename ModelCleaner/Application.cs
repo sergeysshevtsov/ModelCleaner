@@ -20,9 +20,9 @@ public class Application : ExternalApplication
 
     private void CreateRibbon()
     {
-        var panel = Application.CreatePanel("Commands", "SHSS Tools");
+        var panel = Application.CreatePanel("Utils", "SHSS Tools");
 
-        panel.AddPushButton<CmdModelCleaner>("Execute")
+        panel.AddPushButton<CmdModelCleaner>("Model\nCleaner")
             .SetImage("/ModelCleaner;component/Resources/Icons/RevitCleaner16.png")
             .SetLargeImage("/ModelCleaner;component/Resources/Icons/RevitCleaner32.png");
     }

@@ -2,6 +2,7 @@
 using Autodesk.Revit.UI;
 using ModelCleaner.Extensions;
 using ModelCleaner.Models;
+using ModelCleaner.Options;
 using Nice3point.Revit.Toolkit.External;
 
 namespace ModelCleaner.Commands;
@@ -47,7 +48,7 @@ public class CmdModelCleaner : ExternalCommand
                     }
                 }
                 else if (element is View view)
-                    if (!view.IsTemplate && !view.IsAssemblyView && view.CanBePrinted && view.ViewType != ViewType.ProjectBrowser)
+                    if (!view.IsTemplate && !view.IsAssemblyView && view.CanBePrinted && view.ViewType != ViewType.ProjectBrowser && view.Id != Document.ActiveView.Id)
                         if (!view.IsPlacedOnSheet(Document) && !view.IsViewPlaced())
                             isUsed = true;
                         else if (element is GroupType groupType)
@@ -74,33 +75,45 @@ public class CmdModelCleaner : ExternalCommand
 
         if (elementsToDelete.Count > 0)
         {
-            var grouped = elementsToDelete
-                .GroupBy(e => e.ElementType)
-                .Select(g => $"{g.Key}: {g.Count()}");
+            // This part is commented out to avoid showing an option dialog in the current implementation and directly delete elements.
 
-            string summary = string.Join(Environment.NewLine, grouped);
-            string message = $"ModelCleaner found {elementsToDelete.Count} unused elements:\n\n{summary}\n\nDo you want to delete them?";
-            TaskDialogResult result = TaskDialog.Show(
-                "ModelCleaner",
-                message,
-                TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-                TaskDialogResult.No
-            );
+            //var grouped = elementsToDelete
+            //    .GroupBy(e => e.ElementType)
+            //    .Select(g => $"{g.Key}: {g.Count()}");
 
-            if (result != TaskDialogResult.Yes)
-                return;
+            //string summary = string.Join(Environment.NewLine, grouped);
+            //string message = $"ModelCleaner found {elementsToDelete.Count} unused elements:\n\n{summary}\n\nDo you want to delete them?";
+            //TaskDialogResult result = TaskDialog.Show(
+            //    "ModelCleaner",
+            //    message,
+            //    TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
+            //    TaskDialogResult.No
+            //);
 
-            //Document.Delete([.. elementsToDelete.Select(e => e.ElementId)]);
-            foreach(ElementData elementData in elementsToDelete)
+            //if (result != TaskDialogResult.Yes)
+            //    return;
+
+            ////Document.Delete([.. elementsToDelete.Select(e => e.ElementId)]);
+            //foreach(ElementData elementData in elementsToDelete)
+            //{
+            //    try
+            //    {
+            //        var elementId = elementData.ElementId;
+            //        Document.Delete(elementId);
+            //    }
+            //    catch { }
+            //}
+            //TaskDialog.Show("ModelCleaner", $"{elementsToDelete.Count} unused elements deleted.");
+
+            var dialog = new Options.OptionsWindow(Document, elementsToDelete);
+            new System.Windows.Interop.WindowInteropHelper(dialog)
             {
-                try
-                {
-                    var elementId = elementData.ElementId;
-                    Document.Delete(elementId);
-                }
-                catch { }
-            }
-            TaskDialog.Show("ModelCleaner", $"{elementsToDelete.Count} unused elements deleted.");
+                Owner = Autodesk.Windows.ComponentManager.ApplicationWindow
+            };
+            dialog.ShowDialog();
+
+            if (!(dialog.DataContext as OptionsDataContext).IsCleaned)
+                return;
         }
         else
             TaskDialog.Show("ModelCleaner", "No unused elements found.");
